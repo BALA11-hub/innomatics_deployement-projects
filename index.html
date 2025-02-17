@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrewHub Billing System</title>
+    <link rel="stylesheet" href="./coffee4.css">
+</head>
+<body>
+    <div class="container">
+        <h2>BrewHub Digital Billing</h2>
+        
+        <label for="coffee">Select Coffee:</label>
+        <select id="coffee" onchange="updateAddons()">
+            <option value="5" data-addon="whippedCream">Latte - $5</option>
+            <option value="4" data-addon="extraShot">Espresso - $4</option>
+            <option value="6" data-addon="whippedCream">Mocha - $6</option>
+        </select>
+        
+        <label for="size">Select Size:</label>
+        <select id="size">
+            <option value="1">Small</option>
+            <option value="1.5">Medium (+50%)</option>
+            <option value="2">Large (+100%)</option>
+        </select>
+        
+        <label>Add-ons:</label>
+        <div class="addons">
+            <label><input type="checkbox" id="whippedCream" value="0.5" disabled> Whipped Cream (+$0.5)</label>
+            <label><input type="checkbox" id="extraShot" value="1" disabled> Extra Shot (+$1)</label>
+        </div>
+        
+        <label for="membership">Membership Level:</label>
+        <select id="membership">
+            <option value="1">Regular</option>
+            <option value="0.9">Silver (10% off)</option>
+            <option value="0.8">Gold (20% off)</option>
+        </select>
+        
+        <label for="promo">Promo Code:</label>
+        <input type="text" id="promo" placeholder="Enter promo code">
+        
+        <div class="summary">
+            <p>Subtotal: $<span id="subtotal">0.00</span></p>
+            <p>GST (5%): $<span id="gst">0.00</span></p>
+            <p>Discount: $<span id="discount">0.00</span></p>
+            <h3>Total: $<span id="totalPrice">0.00</span></h3>
+        </div>
+        
+        <button onclick="calculateTotal()">Calculate Total</button>
+    </div>
+    
+    <script>
+        function updateAddons() {
+            let coffeeSelect = document.getElementById("coffee");
+            let selectedOption = coffeeSelect.options[coffeeSelect.selectedIndex];
+            let allowedAddon = selectedOption.getAttribute("data-addon");
+            
+            document.getElementById("whippedCream").disabled = allowedAddon !== "whippedCream";
+            document.getElementById("extraShot").disabled = allowedAddon !== "extraShot";
+        }
+
+        function calculateTotal() {
+            let coffeePrice = parseFloat(document.getElementById("coffee").value);
+            let sizeMultiplier = parseFloat(document.getElementById("size").value);
+            let membershipDiscount = parseFloat(document.getElementById("membership").value);
+            let addOnPrice = 0;
+            
+            if (document.getElementById("whippedCream").checked && !document.getElementById("whippedCream").disabled) {
+                addOnPrice += 0.5;
+            }
+            if (document.getElementById("extraShot").checked && !document.getElementById("extraShot").disabled) {
+                addOnPrice += 1;
+            }
+            
+            let subtotal = coffeePrice * sizeMultiplier + addOnPrice;
+            let gst = subtotal * 0.05; // 5% GST
+            let discount = subtotal * (1 - membershipDiscount);
+            let total = (subtotal - discount + gst);
+            
+            // Apply promo code discount
+            let promoCode = document.getElementById("promo").value;
+            if (promoCode === "BREWHUB10") {
+                let promoDiscount = total * 0.1;
+                total -= promoDiscount;
+                discount += promoDiscount;
+            }
+            
+            document.getElementById("subtotal").textContent = subtotal.toFixed(2);
+            document.getElementById("gst").textContent = gst.toFixed(2);
+            document.getElementById("discount").textContent = discount.toFixed(2);
+            document.getElementById("totalPrice").textContent = total.toFixed(2);
+        }
+
+        window.onload = updateAddons;
+    </script>
+</body>
+</html>
